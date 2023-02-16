@@ -1,0 +1,32 @@
+﻿@model IEnumerable<string>
+
+<div class="accordion mt-3" id="snippetList">
+
+    @{
+        var counter = 0;
+    }
+
+    @foreach (string snippetName in Model)
+    {
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading_@counter">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_@counter" aria-expanded="false" aria-controls="collapse_@counter">
+                    @System.IO.Path.GetFileNameWithoutExtension(snippetName)
+                </button>
+            </h2>
+            <div tx-snippet-name="@snippetName" id="collapse_@counter" class="accordion-collapse collapse" aria-labelledby="heading_@counter" data-bs-parent="#snippetList">
+                <div class="accordion-body" id="body_@counter">
+                    <h6>Preview</h6>
+                    <div class="snippet-preview mb-3"></div>
+                    <input onclick="getSnippet('@snippetName', 'TX')" type="button" class="btn btn-success" value="Insert" />
+                </div>
+            </div>
+        </div>
+
+        {
+            counter++;
+        }
+    }
+
+</div>

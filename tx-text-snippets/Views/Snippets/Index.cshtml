@@ -1,0 +1,64 @@
+﻿@model IEnumerable<string>
+
+@{
+    ViewData["Title"] = "Snippets";
+}
+
+<div class="container mt-5 mb-3">
+
+<h1>Snippets</h1>
+
+<a asp-controller="Snippets" asp-action="New" type="button" class="btn btn-success">New Snippet</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Filename</th>
+            <th scope="col">Action</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (string snippetName in Model) {
+            <tr>
+                <td>@snippetName</td>
+                <td>
+                    <a asp-controller="Snippets" asp-action="New" asp-route-snippetName="@snippetName" type="button" class="btn btn-success">Edit</a>
+                    <input onclick="deleteSnippet('@snippetName')" type="button" class="btn btn-danger" value="Delete" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+</div>
+
+@section Scripts
+    {
+
+    <script>
+        function deleteSnippet(snippetName) {
+
+            var serviceURL = "@Url.Action("Delete", "Snippets")";
+
+            $.ajax({
+                type: "POST",
+                url: serviceURL,
+                data: {
+                    name: snippetName
+                },
+                success: successFunc,
+                error: errorFunc
+            });
+
+            function successFunc(data, status) {
+               location.reload();
+            }
+
+            function errorFunc() {
+                $("#myToast .toast-body").text("Error! :-(");
+                $("#myToast").toast("show");
+            }
+        }
+    </script>
+}

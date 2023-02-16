@@ -1,0 +1,94 @@
+﻿@model string
+
+@{
+
+    string title = (Model == null) ? "New Snippet" : "Edit Snippet";
+    string snippetName = (Model == null) ? Guid.NewGuid().ToString() : System.IO.Path.GetFileNameWithoutExtension(Model);
+    ViewData["Title"] = title;
+}
+
+@using TXTextControl.Web.MVC
+
+<div class="container mt-5 mb-3">
+
+<h1>@title</h1>
+
+<div class="row">
+    <div class="col-6 mb-3">
+        <label for="inputSnippetName" class="form-label">Snippet Name</label>
+        <input value="@snippetName" type="text" id="inputSnippetName" class="form-control" aria-describedby="SnippetNameHelpBlock">
+        <div id="SnippetNameHelpBlock" class="form-text">
+            Add a name for the text snippet that helps to find the snippet.
+        </div>
+    </div>
+</div>
+
+
+@if (Model != null) {
+        @Html.TXTextControl().TextControl().LoadText(ViewBag.SnippetDirectory + "/" + Model, TXTextControl.Web.StreamType.InternalUnicodeFormat).Render()
+}
+else
+{
+    @Html.TXTextControl().TextControl().Render()
+}
+
+
+<input onclick="submitSnippet()" type="button" class="btn btn-success" value="Save" />
+<a asp-controller="Snippets" asp-action="Index" type="button" class="btn btn-primary">Back</a>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="myToast" role="alert" aria-live="assertive" aria-atomic="true" class="toast" data-bs-autohide="true">
+        <div class="toast-header">
+            <img src="/images/tx_icon.svg" class="rounded me-2" alt="Text Control">
+            <strong class="me-auto">Text Control Document Builder</strong>
+            <small>Just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Snippet has been successfully saved.
+        </div>
+    </div>
+</div>
+
+</div>
+
+@section Scripts
+{
+
+    <script>
+        function submitSnippet() {
+
+            var serviceURL = "@Url.Action("Create", "Snippets")";
+            var snippetName = document.getElementById("inputSnippetName").value;
+
+            TXTextControl.saveDocument(TXTextControl.StreamType.InternalUnicodeFormat, function (e) {
+                bDocument = e.data;
+                // send document to controller
+                $.ajax({
+                    type: "POST",
+                    url: serviceURL,
+                    data: {
+                        document: e.data,
+                        name: snippetName
+                    },
+                    success: successFunc,
+                    error: errorFunc
+                });
+            });
+
+            function successFunc(data, status) {
+                $("#myToast .toast-body").text("Snippet has been successfully saved.");
+                $("#myToast").toast("show");
+            }
+
+            function errorFunc() {
+                $("#myToast .toast-body").text("Error! :-(");
+                $("#myToast").toast("show");
+            }
+        }
+
+        TXTextControl.addEventListener("textControlLoaded", function () {
+            TXTextControl.setViewMode(TXTextControl.ViewMode.Normal);
+        })
+    </script>
+}

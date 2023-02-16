@@ -1,0 +1,49 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+h1 {
+    margin-bottom: 2rem;
+}
+
+.toast-header img {
+    width: 16px;
+}
+
+.container-editor {
+    height: calc(100vH - 10rem);
+}
+
+.sidepanel {
+    border-left: 1px solid #c2c2c2;
+    border-top: 1px solid #c2c2c2;
+    border-right: 1px solid #c2c2c2;
+    height: calc(100vH - 10rem);
+    margin-right: -1.50rem;
+    padding: 1rem;
+    overflow-y: scroll;
+}
+
+.snippet-preview {
+    background-color: #fcfcfc;
+    border: 1px solid #c2c2c2;
+    border-radius: 4px;
+    padding: 0px 10px 5px 10px;
+    overflow: hidden;
+    max-height: 200px;
+}

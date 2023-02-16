@@ -1,0 +1,180 @@
+﻿@{
+    ViewData["Title"] = "Document Builder";
+}
+
+@using TXTextControl.Web.MVC
+
+<div class="row container-editor">
+    <div class="col-3">
+        <div class="sidepanel">
+            <h5>Convert to Snippet</h5>
+            <button disabled id="btnNewSnippet" onclick="submitSnippet()" type="button" class="btn btn-success" value="New Snippet">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                New Snippet
+            </button>
+
+            <h5 class="mt-5">Insert Snippets</h5>
+            <div class="input-group">
+                <div class="input-group-text">🔍</div>
+                <input onkeyup="filter()" type="text" class="form-control" id="searchSnippet" placeholder="Snipped name">
+                
+                <button onclick="clearSearch()" class="btn btn-outline-secondary border-left-0 border" type="button">
+                    X
+                </button>
+            </div>
+            <div class="accordion mt-3" id="snippetList">
+                
+            </div>
+        </div>
+    </div>
+    <div class="col-9">
+        @Html.TXTextControl().TextControl(settings => {
+            settings.Dock = TXTextControl.Web.DockStyle.Fill;
+        }).Render()
+    </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="myToast" role="alert" aria-live="assertive" aria-atomic="true" class="toast" data-bs-autohide="true">
+        <div class="toast-header">
+            <img src="/images/tx_icon.svg" class="rounded me-2" alt="Text Control">
+            <strong class="me-auto">Text Control Document Builder</strong>
+            <small>Just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Snippet has been successfully saved.
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+
+    <script>
+
+        $(document).ready(function () {
+            updateSnippetList();
+        });
+
+        function updateSnippetList() {
+            $("#snippetList").load("/Snippets/SnippetListPartial", function() {
+                $('.accordion-collapse').on('show.bs.collapse', function (e) {
+                    var element = e.target;
+                    getSnippet(element.getAttribute("tx-snippet-name"), "HTM");
+                })
+            });
+        }
+
+        function getSnippet(snippetName, snippetFormat) {
+
+            var serviceURL = "@Url.Action("Content", "Snippets")";
+
+            console.log(snippetName);
+
+            TXTextControl.saveDocument(TXTextControl.StreamType.InternalUnicodeFormat, function (e) {
+                bDocument = e.data;
+                // send document to controller
+                $.ajax({
+                    type: "POST",
+                    url: serviceURL,
+                    data: {
+                        name: snippetName,
+                        format: snippetFormat
+                    },
+                    success: successFunc,
+                    error: errorFunc
+                });
+            });
+
+            function successFunc(data, status) {
+                if (snippetFormat == "HTM")
+                    document.querySelector('[tx-snippet-name="' + snippetName + '"] .snippet-preview').innerHTML = data + "...";
+                else
+                    TXTextControl.selection.load(TXTextControl.StreamType.InternalUnicodeFormat, data);
+            }
+
+            function errorFunc() {
+                $("#myToast .toast-body").text("Error! :-(");
+                $("#myToast").toast("show");
+            }
+        }
+
+        function submitSnippet() {
+
+            var serviceURL = "@Url.Action("Create", "Snippets")";
+
+            $("#btnNewSnippet span").removeClass('d-none');
+
+            TXTextControl.selection.getText(function (snippetName) {
+                TXTextControl.selection.save(TXTextControl.StreamType.InternalUnicodeFormat, function (e) {
+                    bDocument = e.data;
+                    // send document to controller
+                    $.ajax({
+                        type: "POST",
+                        url: serviceURL,
+                        data: {
+                            document: e.data,
+                            name: snippetName.substring(0,25)
+                        },
+                        success: successFunc,
+                        error: errorFunc
+                    });
+                });
+            });
+
+            function successFunc(data, status) {
+                $("#btnNewSnippet span").addClass('d-none');
+                $("#myToast .toast-body").text("Snippet has been successfully saved.");
+                $("#myToast").toast("show");
+                updateSnippetList();
+            }
+
+            function errorFunc() {
+                $("#myToast .toast-body").text("Error! :-(");
+                $("#myToast").toast("show");
+            }
+        }
+
+        function clearSearch() {
+            document.querySelector("#searchSnippet").value = "";
+            filter();
+        }
+
+        function filter() {
+            var filterString = document.querySelector("#searchSnippet").value.toLowerCase();
+
+            var divs = document.querySelectorAll('.accordion-item button');
+
+            [].forEach.call(divs, function (div) {
+
+                if (div.innerText.toLowerCase().includes(filterString)) {
+                    div.parentNode.parentNode.style.display = "block";
+                }
+                else {
+                    div.parentNode.parentNode.style.display = "none";
+                }
+
+            });
+            
+        }
+
+        TXTextControl.addEventListener("textControlLoaded", function() {
+
+            TXTextControl.addEventListener("inputPositionChanged", function () {
+
+                TXTextControl.selection.getLength(function(length){
+                    if (length > 0) {
+                        document.querySelector("#btnNewSnippet").disabled = false;
+                    }
+                    else
+                    {
+                        document.querySelector("#btnNewSnippet").disabled = true;
+                    }
+                });
+            });
+
+        });
+
+    </script>
+}

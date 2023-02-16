@@ -42,7 +42,11 @@ namespace tx_text_snippets.Controllers {
 
             string htmlString;
 
-            tx.Selection.Save(out htmlString, TXTextControl.StringStreamType.HTMLFormat);
+            TXTextControl.SaveSettings saveSettings = new TXTextControl.SaveSettings() {
+               CssSaveMode = TXTextControl.CssSaveMode.Inline
+            };
+
+            tx.Selection.Save(out htmlString, TXTextControl.StringStreamType.HTMLFormat, saveSettings);
 
             TextReader reader = new StringReader(htmlString);
             HtmlDocument doc = new HtmlDocument();

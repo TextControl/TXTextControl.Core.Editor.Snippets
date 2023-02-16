@@ -72,19 +72,15 @@
 
             console.log(snippetName);
 
-            TXTextControl.saveDocument(TXTextControl.StreamType.InternalUnicodeFormat, function (e) {
-                bDocument = e.data;
-                // send document to controller
-                $.ajax({
-                    type: "POST",
-                    url: serviceURL,
-                    data: {
-                        name: snippetName,
-                        format: snippetFormat
-                    },
-                    success: successFunc,
-                    error: errorFunc
-                });
+            $.ajax({
+                type: "POST",
+                url: serviceURL,
+                data: {
+                    name: snippetName,
+                    format: snippetFormat
+                },
+                success: successFunc,
+                error: errorFunc
             });
 
             function successFunc(data, status) {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HtmlAgilityPack;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using tx_text_snippets.Models;
 
@@ -38,7 +39,16 @@ namespace tx_text_snippets.Controllers {
             tx.Load(Convert.FromBase64String(document), TXTextControl.BinaryStreamType.InternalUnicodeFormat);
 
             tx.Select(0, 200);
-            tx.Selection.Save(snippetName + ".htm", TXTextControl.StreamType.HTMLFormat);
+
+            string htmlString;
+
+            tx.Selection.Save(out htmlString, TXTextControl.StringStreamType.HTMLFormat);
+
+            TextReader reader = new StringReader(htmlString);
+            HtmlDocument doc = new HtmlDocument();
+            doc.Load(reader);
+            HtmlNode bodyNode = doc.DocumentNode.SelectSingleNode("/html/body");
+            System.IO.File.WriteAllText(snippetName + ".htm", bodyNode.InnerHtml);
          }
 
          System.IO.File.WriteAllBytes(snippetName + ".tx", Convert.FromBase64String(document));

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using tx_text_snippets.Models;
+using TXTextControl.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,20 +25,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// serve static linked files (JavaScript and CSS for the editor)
-app.UseStaticFiles(new StaticFileOptions {
-	FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
-		 System.IO.Path.Combine(System.IO.Path.GetDirectoryName(
-			  System.Reflection.Assembly.GetEntryAssembly().Location),
-			  "TXTextControl.Web")),
-	RequestPath = "/TXTextControl.Web"
-});
-
 // enable Web Sockets
 app.UseWebSockets();
 
 // attach the Text Control WebSocketHandler middleware
-app.UseMiddleware<TXTextControl.Web.WebSocketMiddleware>();
+app.UseTXWebSocketMiddleware();
 
 app.UseAuthorization();
 
